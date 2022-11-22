@@ -16,7 +16,7 @@ def get_pairs():
         timeout = 3
     for pair in pairs:
         req = requests.get(F"https://api-pub.bitfinex.com/v2/ticker/{pair}")
-        objects.append(req)
+        objects.append([pair, req])
         time.sleep(timeout)
     return objects
 
@@ -24,13 +24,13 @@ pairs = get_pairs()
 @pytest.mark.parametrize("raw", pairs, ids = [str(x) for x in pairs])
 class TestRequests:
     def test_code(self, raw):
-        assert raw.status_code == 200, "Код выполнения запроса не 200"
+        assert raw[1].status_code == 200, "Код выполнения запроса не 200"
 
     def test_values_count(self, raw):
-        data = raw.json()
+        data = raw[1].json()
         assert len(data) == 10, "В объекте не 10 значений"
 
     def test_types(self, raw):
-        data = raw.json()
+        data = raw[1].json()
         for value in data:
             assert isinstance(value, (int, float)), "Одно из значений объекта - не числовое"
